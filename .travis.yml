@@ -1,0 +1,22 @@
+language: minimal
+services: docker
+env:
+  matrix:
+  - DOCKER_COMPOSE_VERSION=1.25.4
+  global:
+  - secure: kWhT42TtuTr+n+kY1CCy/NK+i4d/7BWN7SU88+XV58aW6idRwBZvc9AgjUFUIEK8+Le/TRHGH9mk3ACLsUbZa+EYreII46poNfrXT9dzfUawo4bofu3YHkpAY/wmLT831RdtDYhUvSM0ENPCj4bQo5l9bQMRY3QNHbZyArxJU0f69cogw48BctLTHbORctFKahhZl87d6aC8j4c5hCAY+/l51+bLIXe5Lzm3ppstv7HCTb5UzN4znexBgLhE/lQC/pGJhnwFS6lnCMBSrR3RatXAfUN6qDBSx/wxDAfrqCyyiTONi1I64s5Ls1x7bH1fchO3px6kCY4/xvmxor0h29hwOqxXGWA21tMZpZ7GM+PlpPSb8Cay4/yCIUvVXdii/+7Ea7gI3e5TncKwoihBuUe6h+5rmlYYrBYIoLP0fZqB6HTwPWY/rK06Gql+SnoXrsNnoxJP25o48UUTNIkyQpfufq/zm+4dOSVCqcws9yBu0eR3XFv9xbV9deyU49iWEuuiP81qaXR1vwtAvHLYcIQNVIcvEEeG4OKUG4OqmmXrnbFAW14zTei/O0SY40jVcEad6/epHn68lrYBau13PyANZMVKbGkCvJ/nMCqsEgRRuHeZsJS+CrhxPBpdU2RIZgj9xm7CAqRv80oOwi3sA+15BwQdWs8q7oVInx/YWm0=
+  - secure: bcr8ae6jyJeWysiKbdCLmg95pW07Kh4AJSfMyc269MMLjQ83ZwNimjb3ISlt2kA/QIFBXi0OTzYnNUvuWDECphsSd5hQ7Qn2IouH2x/tGH0Ak94yefvNMKAD5kgEmaIee44J0Ky06YkrKFoasG4ecJTDtO3o/JBor/EbiXXDvCTiDfeaHeu63PB70Dx5CzUKJ+T0Oh+wPzIQP3DRi+SY0H3I7grLjw2tAvZTx1Mrr6mcKXxIj3X7B8apNg+PlGY2fwn4hoO7UQru/qtox+a7RyqHxZmbK0mo4i5cgvPUTdbYjT/fIhsVEzuxc/hPiuk29FpqCqJTAWuK2LdBvdZk1gD8NOkafn2CjWwE2BFw3sw4yBz1uDpdTcHxzpD747bbfBu+ZSIxov9JpNfU/RXmoAb8P0psyj0ZedH12qxqFsdmM7V0CKXsRcAUDG5lgGUf8X3MWS4GxCIh43IyYtwkAcphkCvog1/I2BtnDEccGeHJoG458YsT5Jdl6NbMAFhRcQqwMhSPRfd2Wrr82Vkle3foZLaGTHamS91bPnsLqyQcIHgCbPQjGL3kmkJ2evu1uLcYjpqOYs3VFld2pimx01n0JFTA8SPt5c+G5VDgiYqRGpLpBJARCRIEH8q55p6yMu3XK0h6hLLLDDRywB5tOUlPpSeyFPSgpm1lnBQT4dI=
+before_install:
+- docker -v && docker-compose -v
+- sudo rm /usr/local/bin/docker-compose
+- curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname
+  -s`-`uname -m` > docker-compose
+- chmod +x docker-compose
+- sudo mv docker-compose /usr/local/bin
+- curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+- chmod +x ./kubectl
+- sudo mv ./kubectl /usr/local/bin/kubectl
+install:
+- docker-compose -f udacity-c3-deployment/docker/docker-compose-build.yaml build --parallel
+- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+- docker-compose -f udacity-c3-deployment/docker/docker-compose-build.yaml push
