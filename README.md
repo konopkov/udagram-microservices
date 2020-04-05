@@ -23,6 +23,7 @@ Required env variables
 | AWS_PROFILE        | default                                    |
 | AWS_BUCKET         | udagrambucket                              |
 | JWT_SECRET         | change-me                                  |
+| DOCKER_USERNAME    | docker-user                                |
 
 Build docker images and run using docker-compose
 ```
