@@ -26,7 +26,15 @@ install:
 - docker-compose -f udacity-c3-deployment/docker/docker-compose-build.yaml build --parallel
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 - docker-compose -f udacity-c3-deployment/docker/docker-compose-build.yaml push
-- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN  apply -f backend-feed-deployment.yaml
-- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN  apply -f backend-user-deployment.yaml
+
+- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN apply -f backend-feed-deployment.yaml
+- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN set image deployment/backend-feed backend-feed=konopkov/udacity-restapi-feed:latest
+
+- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN apply -f backend-user-deployment.yaml
+- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN set image deployment/backend-user backend-user=konopkov/udacity-restapi-user:latest
+
 - ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN apply -f frontend-deployment.yaml
-- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN \\ apply -f reverseproxy-deployment.yaml
+- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN set image deployment/frontend frontend=konopkov/udacity-frontend:latest
+
+- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN apply -f reverseproxy-deployment.yaml
+- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN set image deployment/reverseproxy reverseproxy=konopkov/reverseproxy:latest

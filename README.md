@@ -109,6 +109,14 @@ Required env variables
 ```
 kubectl --kubeconfig udagram-kubeconfig create serviceaccount travis
 kubectl --kubeconfig udagram-kubeconfig get serviceaccounts travis -o yaml
+
+kubectl --kubeconfig udagram-kubeconfig create rolebinding travis \
+  --clusterrole=admin \
+  --serviceaccount=default:travis \
+  --namespace=default
+
+kubectl --kubeconfig udagram-kubeconfig get secrets
+kubectl --kubeconfig udagram-kubeconfig describe secret travis-token-k9c8n
 kubectl --kubeconfig udagram-kubeconfig get secret travis-token-k9c8n -o yaml
 ```
 - Set Travis env variables
