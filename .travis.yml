@@ -26,11 +26,7 @@ install:
 - docker-compose -f udacity-c3-deployment/docker/docker-compose-build.yaml build --parallel
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 - docker-compose -f udacity-c3-deployment/docker/docker-compose-build.yaml push
-- "./kubectl --kubeconfig=/dev/null \\ --server=$KUBERNETES_SERVER \\ --certificate-authority=ca.crt
-  \\ --token=$KUBERNETES_TOKEN \\ apply -f backend-feed-deployment.yaml"
-- "./kubectl --kubeconfig=/dev/null \\ --server=$KUBERNETES_SERVER \\ --certificate-authority=ca.crt
-  \\ --token=$KUBERNETES_TOKEN \\ apply -f backend-user-deployment.yaml"
-- "./kubectl --kubeconfig=/dev/null \\ --server=$KUBERNETES_SERVER \\ --certificate-authority=ca.crt
-  \\ --token=$KUBERNETES_TOKEN \\ apply -f frontend-deployment.yaml"
-- "./kubectl --kubeconfig=/dev/null \\ --server=$KUBERNETES_SERVER \\ --certificate-authority=ca.crt
-  \\ --token=$KUBERNETES_TOKEN \\ apply -f reverseproxy-deployment.yaml"
+- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN  apply -f backend-feed-deployment.yaml
+- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN  apply -f backend-user-deployment.yaml
+- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN apply -f frontend-deployment.yaml
+- ./kubectl --kubeconfig=/dev/null --server=$KUBERNETES_SERVER --certificate-authority=ca.crt --token=$KUBERNETES_TOKEN \\ apply -f reverseproxy-deployment.yaml
