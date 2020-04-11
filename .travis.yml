@@ -1,5 +1,10 @@
 language: minimal
 services: docker
+branches:
+  only:
+  - development
+  - production
+  - master
 env:
   matrix:
   - DOCKER_COMPOSE_VERSION=1.25.4
@@ -16,7 +21,16 @@ before_install:
 - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
 - chmod +x ./kubectl
 - sudo mv ./kubectl /usr/local/bin/kubectl
+- echo "$KUBERNETES_CLUSTER_CERTIFICATE" | base64 --decode > ca.crt
 install:
 - docker-compose -f udacity-c3-deployment/docker/docker-compose-build.yaml build --parallel
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 - docker-compose -f udacity-c3-deployment/docker/docker-compose-build.yaml push
+- "./kubectl --kubeconfig=/dev/null \\ --server=$KUBERNETES_SERVER \\ --certificate-authority=ca.crt
+  \\ --token=$KUBERNETES_TOKEN \\ apply -f backend-feed-deployment.yaml"
+- "./kubectl --kubeconfig=/dev/null \\ --server=$KUBERNETES_SERVER \\ --certificate-authority=ca.crt
+  \\ --token=$KUBERNETES_TOKEN \\ apply -f backend-user-deployment.yaml"
+- "./kubectl --kubeconfig=/dev/null \\ --server=$KUBERNETES_SERVER \\ --certificate-authority=ca.crt
+  \\ --token=$KUBERNETES_TOKEN \\ apply -f frontend-deployment.yaml"
+- "./kubectl --kubeconfig=/dev/null \\ --server=$KUBERNETES_SERVER \\ --certificate-authority=ca.crt
+  \\ --token=$KUBERNETES_TOKEN \\ apply -f reverseproxy-deployment.yaml"

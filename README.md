@@ -47,3 +47,73 @@ Access key can be generated in [Docker Hub account](https://hub.docker.com/setti
 travis encrypt DOCKER_USERNAME=<user> --add env.global
 travis encrypt DOCKER_PASSWORD=<access-key> --add env.global
 ```
+
+### Kubernetes deploy
+
+- Create Kubernetes cluster using [Kubeone manual](https://github.com/kubermatic/kubeone/blob/master/docs/quickstart-aws.md)
+- Apply kubernetes `*-secrets`, `*-deployment` , and `*-service` files
+```
+kubectl --kubeconfig udagram-kubeconfig apply -f env-configmap.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f env-secret.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f aws-secret.yaml
+
+kubectl --kubeconfig udagram-kubeconfig apply -f backend-feed-deployment.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f backend-user-deployment.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f frontend-deployment.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f reverseproxy-deployment.yaml
+
+kubectl --kubeconfig udagram-kubeconfig apply -f backend-feed-service.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f backend-user-service.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f frontend-service.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f reverseproxy-service.yaml
+
+```
+
+- Check resources
+```
+kubectl --kubeconfig udagram-kubeconfig get pods
+kubectl --kubeconfig udagram-kubeconfig get nodes
+kubectl --kubeconfig udagram-kubeconfig get services
+kubectl --kubeconfig udagram-kubeconfig get deployment
+```
+
+- Destroy resources
+```
+kubectl --kubeconfig udagram-kubeconfig delete -f backend-feed-deployment.yaml
+kubectl --kubeconfig udagram-kubeconfig delete -f backend-user-deployment.yaml
+kubectl --kubeconfig udagram-kubeconfig delete -f frontend-deployment.yaml
+kubectl --kubeconfig udagram-kubeconfig delete -f reverseproxy-deployment.yaml
+
+kubectl --kubeconfig udagram-kubeconfig delete -f backend-feed-service.yaml
+kubectl --kubeconfig udagram-kubeconfig delete -f backend-user-service.yaml
+kubectl --kubeconfig udagram-kubeconfig delete -f frontend-service.yaml
+kubectl --kubeconfig udagram-kubeconfig delete -f reverseproxy-service.yaml
+```
+
+- [Troubleshooting](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/):
+
+```
+kubectl describe pods ${POD_NAME}
+```
+
+### Deployment from CI
+
+Required env variables
+| Variable                       | Example value                                |
+| ------------------------------ | -------------------------------------------- |
+| KUBERNETES_SERVER              | https://xxx.elb.us-east-1.amazonaws.com:6443 |
+| KUBERNETES_TOKEN               | ZXlKaGJHY2lPaUpT....VXpJMU5pSXNJbXRwWkNJN    |
+| KUBERNETES_CLUSTER_CERTIFICATE | LS0tLS1CRUdJTiBD....RVJUSUZJQ0FURS0tLS0tC    |
+
+- Create cluster access token for `travis` user
+```
+kubectl --kubeconfig udagram-kubeconfig create serviceaccount travis
+kubectl --kubeconfig udagram-kubeconfig get serviceaccounts travis -o yaml
+kubectl --kubeconfig udagram-kubeconfig get secret travis-token-k9c8n -o yaml
+```
+- Set Travis env variables
+```
+travis env set KUBERNETES_SERVER <kubernetes server url from udagram-kubeconfig>
+travis env set KUBERNETES_TOKEN  <token file content from prev command>
+travis env set KUBERNETES_CLUSTER_CERTIFICATE <ca file content from prev command>
+```
