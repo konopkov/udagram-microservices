@@ -26,7 +26,7 @@ Required env variables
 | DOCKER_USERNAME    | docker-user                                |
 | URL                | http://localhost:8100 (frontend address)   |
 
-Env variable `URL` is used in [server.ts](/udacity-c3-restapi-feed/src/setver.ts) to enable CORS from
+Env variable `URL` is used in [server.ts](/udacity-c3-restapi-feed/src/server.ts) to enable CORS from
 specified URL.
 Env variable `AWS_PROFILE` is defining which AWS profile should be used from `~/.aws/credentials` file
 
@@ -82,6 +82,8 @@ kubectl --kubeconfig udagram-kubeconfig get services
 kubectl --kubeconfig udagram-kubeconfig get deployment
 ```
 
+- Specify LoadBalancer EXTERNAL-IP as API URL in [Angular environments files](udacity-c3-frontend/src/environments)
+
 - Destroy resources
 ```
 kubectl --kubeconfig udagram-kubeconfig delete -f backend-feed-deployment.yaml
@@ -103,14 +105,14 @@ kubectl --kubeconfig udagram-kubeconfig describe pods ${POD_NAME}
 
 ### Deployment from CI
 
-Required env variables
+- Specify required env variables
 | Variable                       | Example value                                |
 | ------------------------------ | -------------------------------------------- |
 | KUBERNETES_SERVER              | https://xxx.elb.us-east-1.amazonaws.com:6443 |
 | KUBERNETES_TOKEN               | ZXlKaGJHY2lPaUpT....VXpJMU5pSXNJbXRwWkNJN    |
 | KUBERNETES_CLUSTER_CERTIFICATE | LS0tLS1CRUdJTiBD....RVJUSUZJQ0FURS0tLS0tC    |
 
-- Create cluster access token for `travis` user
+- Create cluster access token for `travis` user and assign role
 ```
 kubectl --kubeconfig udagram-kubeconfig create serviceaccount travis
 kubectl --kubeconfig udagram-kubeconfig get serviceaccounts travis -o yaml
