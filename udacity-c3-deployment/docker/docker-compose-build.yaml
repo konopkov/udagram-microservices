@@ -3,16 +3,16 @@ services:
   reverseproxy:
     build:
       context: .
-    image: konopkov/reverseproxy
+    image: konopkov/reverseproxy:$TRAVIS_COMMIT
   backend_user:
     build:
       context: ../../udacity-c3-restapi-user
-    image: konopkov/udacity-restapi-user
+    image: konopkov/udacity-restapi-user:$TRAVIS_COMMIT
   backend_feed:
     build:
       context: ../../udacity-c3-restapi-feed
-    image: konopkov/udacity-restapi-feed
+    image: konopkov/udacity-restapi-feed:$TRAVIS_COMMIT
   frontend:
     build:
       context: ../../udacity-c3-frontend
-    image: konopkov/udacity-frontend
+    image: konopkov/udacity-frontend:$TRAVIS_COMMIT
