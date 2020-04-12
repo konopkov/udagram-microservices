@@ -33,12 +33,12 @@ Env variable `AWS_PROFILE` is defining which AWS profile should be used from `~/
 Build docker images and run using docker-compose
 ```
 docker-compose -f udacity-c3-deployment/docker/docker-compose-build.yaml build --parallel
-docker-compose -f  udacity-c3-deployment/docker/docker-compose.yaml up -d
+docker-compose -f udacity-c3-deployment/docker/docker-compose.yaml up -d
 ```
 
 Stop services:
 ```
-docker-compose -f  udacity-c3-deployment/docker/docker-compose.yaml down
+docker-compose -f udacity-c3-deployment/docker/docker-compose.yaml down
 ```
 
 ### Automatic builds with Travis CI
@@ -49,8 +49,8 @@ to push images into Docker registry, env variables `DOCKER_USERNAME` and `DOCKER
 Access key can be generated in [Docker Hub account](https://hub.docker.com/settings/security)
 - Set Travis env variables
 ```
-travis env set DOCKER_USERNAME=<user>
-travis env set DOCKER_PASSWORD=<access-key>
+travis env set DOCKER_USERNAME <user>
+travis env set DOCKER_PASSWORD <access-key>
 ```
 
 ### Kubernetes deploy
