@@ -6,17 +6,17 @@ x-reverseproxy:
     context: .
   image: konopkov/reverseproxy:latest
 
-x-backend_user:
-  &default-backend_user
+x-backend-user:
+  &default-backend-user
   build:
     context: ../../udacity-c3-restapi-user
-  image: konopkov/udacity-backend_user:latest
+  image: konopkov/udacity-backend-user:latest
 
-x-backend_feed:
-  &default-backend_feed
+x-backend-feed:
+  &default-backend-feed
   build:
     context: ../../udacity-c3-restapi-feed
-  image: konopkov/udacity-backend_feed:latest
+  image: konopkov/udacity-backend-feed:latest
 
 x-frontend:
   &default-frontend
@@ -27,27 +27,27 @@ x-frontend:
 services:
   reverseproxy_latest:
     << : *default-reverseproxy
-  reverseproxy_sha_commit:
+  reverseproxy_sha-commit:
     <<: *default-reverseproxy
     image: konopkov/reverseproxy:$TRAVIS_COMMIT
 
-  backend_user_latest:
-    << : *default-backend_user
-  backend_user_sha_commit:
-    <<: *default-backend_user
+  backend-user_latest:
+    << : *default-backend-user
+  backend-user_sha-commit:
+    <<: *default-backend-user
     image:
       konopkov/udacity-restapi-user:$TRAVIS_COMMIT
 
-  backend_feed_latest:
-    << : *default-backend_feed
-  backend_feed_sha_commit:
-    <<: *default-backend_feed
+  backend-feed_latest:
+    << : *default-backend-feed
+  backend-feed_sha-commit:
+    <<: *default-backend-feed
     image:
       konopkov/udacity-restapi-feed:$TRAVIS_COMMIT
 
   frontend_latest:
     << : *default-frontend
-  frontend_sha_commit:
+  frontend_sha-commit:
     <<: *default-frontend
     image:
       konopkov/udacity-frontend:$TRAVIS_COMMIT
