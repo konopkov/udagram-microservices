@@ -24,6 +24,11 @@ Required env variables
 | AWS_BUCKET         | udagrambucket                              |
 | JWT_SECRET         | change-me                                  |
 | DOCKER_USERNAME    | docker-user                                |
+| URL                | http://localhost:8100 (frontend address)   |
+
+Env variable `URL` is used in [server.ts](/udacity-c3-restapi-feed/src/setver.ts) to enable CORS from
+specified URL.
+Env variable `AWS_PROFILE` is defining which AWS profile should be used from `~/.aws/credentials` file
 
 Build docker images and run using docker-compose
 ```
@@ -93,7 +98,7 @@ kubectl --kubeconfig udagram-kubeconfig delete -f reverseproxy-service.yaml
 - [Troubleshooting](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/):
 
 ```
-kubectl describe pods ${POD_NAME}
+kubectl --kubeconfig udagram-kubeconfig describe pods ${POD_NAME}
 ```
 
 ### Deployment from CI
@@ -116,12 +121,12 @@ kubectl --kubeconfig udagram-kubeconfig create rolebinding travis \
   --namespace=default
 
 kubectl --kubeconfig udagram-kubeconfig get secrets
-kubectl --kubeconfig udagram-kubeconfig describe secret travis-token-k9c8n
-kubectl --kubeconfig udagram-kubeconfig get secret travis-token-k9c8n -o yaml
+kubectl --kubeconfig udagram-kubeconfig describe secret travis-token-xxxx
+kubectl --kubeconfig udagram-kubeconfig get secret travis-token-xxxx -o yaml
 ```
 - Set Travis env variables
 ```
 travis env set KUBERNETES_SERVER <kubernetes server url from udagram-kubeconfig>
-travis env set KUBERNETES_TOKEN  <token file content from prev command>
+travis env set KUBERNETES_TOKEN <token file content from prev command>
 travis env set KUBERNETES_CLUSTER_CERTIFICATE <ca file content from prev command>
 ```
