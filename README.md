@@ -42,15 +42,15 @@ docker-compose -f  udacity-c3-deployment/docker/docker-compose.yaml down
 ```
 
 ### Automatic builds with Travis CI
-[.travis.yml](/.travis.yml) file is using to describe
+[.travis.yml](/.travis.yml) file is using to describe deployment steps
 
 According to [Travis CI documentation](https://docs.travis-ci.com/user/docker/#pushing-a-docker-image-to-a-registry),
 to push images into Docker registry, env variables `DOCKER_USERNAME` and `DOCKER_PASSWORD` should be specified.
-They can be encrypted and included into `.travis.yml` using [CLI commands](https://docs.travis-ci.com/user/environment-variables#encrypting-environment-variables)
 Access key can be generated in [Docker Hub account](https://hub.docker.com/settings/security)
+- Set Travis env variables
 ```
-travis encrypt DOCKER_USERNAME=<user> --add env.global
-travis encrypt DOCKER_PASSWORD=<access-key> --add env.global
+travis env set DOCKER_USERNAME=<user>
+travis env set DOCKER_PASSWORD=<access-key>
 ```
 
 ### Kubernetes deploy
@@ -71,7 +71,6 @@ kubectl --kubeconfig udagram-kubeconfig apply -f backend-feed-service.yaml
 kubectl --kubeconfig udagram-kubeconfig apply -f backend-user-service.yaml
 kubectl --kubeconfig udagram-kubeconfig apply -f frontend-service.yaml
 kubectl --kubeconfig udagram-kubeconfig apply -f reverseproxy-service.yaml
-
 ```
 
 - Check resources
