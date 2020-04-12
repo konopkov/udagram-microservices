@@ -4,50 +4,146 @@ Udagram is a simple cloud application developed alongside the Udacity Cloud Engi
 
 The project is split into three parts:
 1. [The Simple Frontend](/udacity-c3-frontend)
-A basic Ionic client web application which consumes the RestAPI Backend. 
+A basic Ionic client web application which consumes the RestAPI Backend.
 2. [The RestAPI Feed Backend](/udacity-c3-restapi-feed), a Node-Express feed microservice.
 3. [The RestAPI User Backend](/udacity-c3-restapi-user), a Node-Express user microservice.
 
-## Getting Setup
+Running application [screenshots](/screenshots)
 
-> _tip_: this frontend is designed to work with the RestAPI backends). It is recommended you stand up the backend first, test using Postman, and then the frontend should integrate.
+## Deployment
 
-### Installing Node and NPM
-This project depends on Nodejs and Node Package Manager (NPM). Before continuing, you must download and install Node (NPM is included) from [https://nodejs.com/en/download](https://nodejs.org/en/download/).
+### Locally
 
-### Installing Ionic Cli
-The Ionic Command Line Interface is required to serve and build the frontend. Instructions for installing the CLI can be found in the [Ionic Framework Docs](https://ionicframework.com/docs/installation/cli).
+- Required env variables
+| Variable           | Example value                              |
+| ------------------ | ------------------------------------------ |
+| POSTGRESS_USERNAME | db-user                                    |
+| POSTGRESS_PASSWORD | db-password                                |
+| POSTGRESS_DB       | udagramdb                                  |
+| POSTGRESS_HOST     | udagram.xxxxxx.us-east-1.rds.amazonaws.com |
+| AWS_REGION         | us-east-1                                  |
+| AWS_PROFILE        | default                                    |
+| AWS_BUCKET         | udagrambucket                              |
+| JWT_SECRET         | change-me                                  |
+| DOCKER_USERNAME    | docker-user                                |
+| URL                | http://localhost:8100 (frontend address)   |
 
-### Installing project dependencies
+Env variable `URL` is used in [server.ts](/udacity-c3-restapi-feed/src/server.ts) to enable CORS from
+specified URL.
+Env variable `AWS_PROFILE` is defining which AWS profile should be used from `~/.aws/credentials` file
 
-This project uses NPM to manage software dependencies. NPM Relies on the package.json file located in the root of this repository. After cloning, open your terminal and run:
-```bash
-npm install
+- Ensure `~/.aws/credentials` file with the following content:
 ```
->_tip_: **npm i** is shorthand for **npm install**
-
-### Setup Backend Node Environment
-You'll need to create a new node server. Open a new terminal within the project directory and run:
-1. Initialize a new project: `npm init`
-2. Install express: `npm i express --save`
-3. Install typescript dependencies: `npm i ts-node-dev tslint typescript  @types/bluebird @types/express @types/node --save-dev`
-4. Look at the `package.json` file from the RestAPI repo and copy the `scripts` block into the auto-generated `package.json` in this project. This will allow you to use shorthand commands like `npm run dev`
-
-
-### Configure The Backend Endpoint
-Ionic uses enviornment files located in `./src/enviornments/enviornment.*.ts` to load configuration variables at runtime. By default `environment.ts` is used for development and `enviornment.prod.ts` is used for produciton. The `apiHost` variable should be set to your server url either locally or in the cloud.
-
-***
-### Running the Development Server
-Ionic CLI provides an easy to use development server to run and autoreload the frontend. This allows you to make quick changes and see them in real time in your browser. To run the development server, open terminal and run:
-
-```bash
-ionic serve
+[aws_profile_name]
+aws_access_key_id=<aws key id>
+aws_secret_access_key=<aws access key>
 ```
 
-### Building the Static Frontend Files
-Ionic CLI can build the frontend into static HTML/CSS/JavaScript files. These files can be uploaded to a host to be consumed by users on the web. Build artifacts are located in `./www`. To build from source, open terminal and run:
-```bash
-ionic build
+- Build docker images and run using docker-compose
 ```
-***
+docker-compose -f udacity-c3-deployment/docker/docker-compose-build.yaml build --parallel
+docker-compose -f udacity-c3-deployment/docker/docker-compose.yaml up -d
+```
+
+Stop services:
+```
+docker-compose -f udacity-c3-deployment/docker/docker-compose.yaml down
+```
+
+### Automatic builds with Travis CI
+[.travis.yml](/.travis.yml) file is using to describe deployment steps
+
+According to [Travis CI documentation](https://docs.travis-ci.com/user/docker/#pushing-a-docker-image-to-a-registry),
+to push images into Docker registry, env variables `DOCKER_USERNAME` and `DOCKER_PASSWORD` should be specified.
+Access key can be generated in [Docker Hub account](https://hub.docker.com/settings/security)
+- Set Travis env variables
+```
+travis env set DOCKER_USERNAME <user>
+travis env set DOCKER_PASSWORD <access-key>
+```
+
+### Kubernetes deploy
+- Create Kubernetes cluster using [Kubeone manual](https://github.com/kubermatic/kubeone/blob/master/docs/quickstart-aws.md)
+- Define secrets in [aws-secret.yaml](/udacity-c3-deployment/k8s/aws-secret.yaml) and
+[env-secret.yaml](/udacity-c3-deployment/k8s/env-secret.yaml) files using `base64` encoding
+```
+cat ~/.aws/credentials | base64
+echo -n <postgress-password> | base64
+```
+- Define [env-configmap.yaml](/udacity-c3-deployment/k8s/env-configmap.yaml) content
+
+- Apply kubernetes `*-secrets`, `*-deployment` , and `*-service` files
+```
+kubectl --kubeconfig udagram-kubeconfig apply -f env-configmap.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f env-secret.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f aws-secret.yaml
+
+kubectl --kubeconfig udagram-kubeconfig apply -f backend-feed-deployment.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f backend-user-deployment.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f frontend-deployment.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f reverseproxy-deployment.yaml
+
+kubectl --kubeconfig udagram-kubeconfig apply -f backend-feed-service.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f backend-user-service.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f frontend-service.yaml
+kubectl --kubeconfig udagram-kubeconfig apply -f reverseproxy-service.yaml
+```
+
+- Check resources
+```
+kubectl --kubeconfig udagram-kubeconfig get pods
+kubectl --kubeconfig udagram-kubeconfig get nodes
+kubectl --kubeconfig udagram-kubeconfig get services
+kubectl --kubeconfig udagram-kubeconfig get deployment
+```
+
+- Specify LoadBalancer EXTERNAL-IP as API URL in [Angular environments files](udacity-c3-frontend/src/environments)
+
+- Destroy resources
+```
+kubectl --kubeconfig udagram-kubeconfig delete -f backend-feed-deployment.yaml
+kubectl --kubeconfig udagram-kubeconfig delete -f backend-user-deployment.yaml
+kubectl --kubeconfig udagram-kubeconfig delete -f frontend-deployment.yaml
+kubectl --kubeconfig udagram-kubeconfig delete -f reverseproxy-deployment.yaml
+
+kubectl --kubeconfig udagram-kubeconfig delete -f backend-feed-service.yaml
+kubectl --kubeconfig udagram-kubeconfig delete -f backend-user-service.yaml
+kubectl --kubeconfig udagram-kubeconfig delete -f frontend-service.yaml
+kubectl --kubeconfig udagram-kubeconfig delete -f reverseproxy-service.yaml
+```
+
+- [Troubleshooting](https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/):
+
+```
+kubectl --kubeconfig udagram-kubeconfig describe pods ${POD_NAME}
+```
+
+### Deployment from CI
+
+- Specify required env variables
+| Variable                       | Example value                                |
+| ------------------------------ | -------------------------------------------- |
+| KUBERNETES_SERVER              | https://xxx.elb.us-east-1.amazonaws.com:6443 |
+| KUBERNETES_TOKEN               | ZXlKaGJHY2lPaUpT....VXpJMU5pSXNJbXRwWkNJN    |
+| KUBERNETES_CLUSTER_CERTIFICATE | LS0tLS1CRUdJTiBD....RVJUSUZJQ0FURS0tLS0tC    |
+
+- Create cluster access token for `travis` user and assign role
+```
+kubectl --kubeconfig udagram-kubeconfig create serviceaccount travis
+kubectl --kubeconfig udagram-kubeconfig get serviceaccounts travis -o yaml
+
+kubectl --kubeconfig udagram-kubeconfig create rolebinding travis \
+  --clusterrole=admin \
+  --serviceaccount=default:travis \
+  --namespace=default
+
+kubectl --kubeconfig udagram-kubeconfig get secrets
+kubectl --kubeconfig udagram-kubeconfig describe secret travis-token-xxxx
+kubectl --kubeconfig udagram-kubeconfig get secret travis-token-xxxx -o yaml
+```
+- Set Travis env variables
+```
+travis env set KUBERNETES_SERVER <kubernetes server url from udagram-kubeconfig>
+travis env set KUBERNETES_TOKEN <token file content from prev command>
+travis env set KUBERNETES_CLUSTER_CERTIFICATE <ca file content from prev command>
+```

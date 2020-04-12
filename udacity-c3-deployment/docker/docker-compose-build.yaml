@@ -1,18 +1,53 @@
-version: "3"
+version: "3.4"
+
+x-reverseproxy:
+  &default-reverseproxy
+  build:
+    context: .
+  image: konopkov/reverseproxy:latest
+
+x-backend-user:
+  &default-backend-user
+  build:
+    context: ../../udacity-c3-restapi-user
+  image: konopkov/udacity-backend-user:latest
+
+x-backend-feed:
+  &default-backend-feed
+  build:
+    context: ../../udacity-c3-restapi-feed
+  image: konopkov/udacity-backend-feed:latest
+
+x-frontend:
+  &default-frontend
+  build:
+    context: ../../udacity-c3-frontend
+  image: konopkov/udacity-frontend:latest
+
 services:
-  reverseproxy:
-    build:
-      context: .
-    image: scheele/reverseproxy 
-  backend_user:
-    build:
-      context: ../../udacity-c3-restapi-user
-    image: scheele/udacity-restapi-user
-  backend_feed:
-    build:
-      context: ../../udacity-c3-restapi-feed  
-    image: scheele/udacity-restapi-feed
-  frontend:
-    build:
-      context: ../../udacity-c3-frontend  
-    image: scheele/udacity-frontend:local
+  reverseproxy_latest:
+    << : *default-reverseproxy
+  reverseproxy_sha-commit:
+    <<: *default-reverseproxy
+    image: konopkov/reverseproxy:$TRAVIS_COMMIT
+
+  backend-user_latest:
+    << : *default-backend-user
+  backend-user_sha-commit:
+    <<: *default-backend-user
+    image:
+      konopkov/udacity-restapi-user:$TRAVIS_COMMIT
+
+  backend-feed_latest:
+    << : *default-backend-feed
+  backend-feed_sha-commit:
+    <<: *default-backend-feed
+    image:
+      konopkov/udacity-restapi-feed:$TRAVIS_COMMIT
+
+  frontend_latest:
+    << : *default-frontend
+  frontend_sha-commit:
+    <<: *default-frontend
+    image:
+      konopkov/udacity-frontend:$TRAVIS_COMMIT
