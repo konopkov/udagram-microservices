@@ -8,11 +8,13 @@ A basic Ionic client web application which consumes the RestAPI Backend.
 2. [The RestAPI Feed Backend](/udacity-c3-restapi-feed), a Node-Express feed microservice.
 3. [The RestAPI User Backend](/udacity-c3-restapi-user), a Node-Express user microservice.
 
+Running application [screenshots](/screenshots)
+
 ## Deployment
 
 ### Locally
 
-Required env variables
+- Required env variables
 | Variable           | Example value                              |
 | ------------------ | ------------------------------------------ |
 | POSTGRESS_USERNAME | db-user                                    |
@@ -30,7 +32,14 @@ Env variable `URL` is used in [server.ts](/udacity-c3-restapi-feed/src/server.ts
 specified URL.
 Env variable `AWS_PROFILE` is defining which AWS profile should be used from `~/.aws/credentials` file
 
-Build docker images and run using docker-compose
+- Ensure `~/.aws/credentials` file with the following content:
+```
+[aws_profile_name]
+aws_access_key_id=<aws key id>
+aws_secret_access_key=<aws access key>
+```
+
+- Build docker images and run using docker-compose
 ```
 docker-compose -f udacity-c3-deployment/docker/docker-compose-build.yaml build --parallel
 docker-compose -f udacity-c3-deployment/docker/docker-compose.yaml up -d
@@ -54,8 +63,15 @@ travis env set DOCKER_PASSWORD <access-key>
 ```
 
 ### Kubernetes deploy
-
 - Create Kubernetes cluster using [Kubeone manual](https://github.com/kubermatic/kubeone/blob/master/docs/quickstart-aws.md)
+- Define secrets in [aws-secret.yaml](/udacity-c3-deployment/k8s/aws-secret.yaml) and
+[env-secret.yaml](/udacity-c3-deployment/k8s/env-secret.yaml) files using `base64` encoding
+```
+cat ~/.aws/credentials | base64
+echo -n <postgress-password> | base64
+```
+- Define [env-configmap.yaml](/udacity-c3-deployment/k8s/env-configmap.yaml) content
+
 - Apply kubernetes `*-secrets`, `*-deployment` , and `*-service` files
 ```
 kubectl --kubeconfig udagram-kubeconfig apply -f env-configmap.yaml
